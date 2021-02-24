@@ -348,6 +348,35 @@ namespace Oxide.Plugins
             /// <param name="request">The requested <see cref="DownloadRequest"/> instance. </param>
             private IEnumerator DownloadImage(DownloadRequest request)
             {
+                // Add support for neon sign animation frames
+                int fselected = 0;
+                if (request.Url.StartsWith("frame:0"))
+                {
+                fselected = 0;
+                request.Url = request.Url.Replace("frame:0","");
+                }
+                else if (request.Url.StartsWith("frame:1"))
+                {
+                fselected = 1;
+                request.Url = request.Url.Replace("frame:1","");
+                }
+                else if (request.Url.StartsWith("frame:2"))
+                {
+                fselected = 2;
+                request.Url = request.Url.Replace("frame:2","");
+                }
+                else if (request.Url.StartsWith("frame:3"))
+                {
+                fselected = 3;
+                request.Url = request.Url.Replace("frame:3","");
+                }
+                else if (request.Url.StartsWith("frame:4"))
+                {
+                fselected = 4;
+                request.Url = request.Url.Replace("frame:4","");
+                }
+                // END "Add support for neon sign animation frames"
+
                 if (ItemManager.itemDictionaryByName.ContainsKey(request.Url))
                 {
                     request.Url = string.Format(ItemIconUrl, request.Url);
@@ -441,7 +470,8 @@ namespace Oxide.Plugins
                 }
 
                 // Create the image on the filestorage and send out a network update for the sign.
-                request.Sign.SetImage(FileStorage.server.Store(resizedImageBytes, FileStorage.Type.png, request.Sign.NetId));
+                // request.Sign.SetImage(FileStorage.server.Store(resizedImageBytes, FileStorage.Type.png, request.Sign.NetId));
+                request.Sign.SetImage(FileStorage.server.Store(resizedImageBytes, FileStorage.Type.png, request.Sign.NetId),fselected);
                 request.Sign.SendNetworkUpdate();
 
                 // Notify the player that the image was loaded.
@@ -571,7 +601,8 @@ namespace Oxide.Plugins
                 byte[] resizedImageBytes = imageBytes.ResizeImage(size.Width, size.Height, size.ImageWidth, size.ImageHeight, signArtist.Settings.EnforceJpeg && !request.Raw);
 
                 // Create the image on the filestorage and send out a network update for the sign.
-                request.Sign.SetImage(FileStorage.server.Store(resizedImageBytes, FileStorage.Type.png, request.Sign.NetId));
+                // request.Sign.SetImage(FileStorage.server.Store(resizedImageBytes, FileStorage.Type.png, request.Sign.NetId));
+                request.Sign.SetImage(FileStorage.server.Store(resizedImageBytes, FileStorage.Type.png, request.Sign.NetId),0);
                 request.Sign.SendNetworkUpdate();
 
                 // Notify the player that the image was loaded.
@@ -636,7 +667,8 @@ namespace Oxide.Plugins
 
         private interface IPaintableEntity : IBasePaintableEntity
         {
-            void SetImage(uint id);
+            // void SetImage(uint id);
+            void SetImage(uint id,int frameid);
             bool CanUpdate(BasePlayer player);
             uint TextureId();
         }
@@ -671,9 +703,10 @@ namespace Oxide.Plugins
                 Sign = sign;
             }
 
-            public void SetImage(uint id)
+            public void SetImage(uint id,int frameid)
             {
-                Sign.textureIDs = new uint[] { id };
+                //Sign.textureIDs = new uint[] { id };
+                Sign.textureIDs[frameid] = id;
             }
 
             public bool CanUpdate(BasePlayer player)
@@ -696,7 +729,7 @@ namespace Oxide.Plugins
                 Sign = sign;
             }
 
-            public void SetImage(uint id)
+            public void SetImage(uint id,int frameid)
             {
                 Sign._overlayTextureCrc = id;
             }
@@ -768,6 +801,13 @@ namespace Oxide.Plugins
                 ["photoframe.large"] = new ImageSize(320, 240),
                 ["photoframe.portrait"] = new ImageSize(320, 384),
                 ["photoframe.landscape"] = new ImageSize(320, 240),
+
+                // Neon Signs
+                ["sign.neon.xl"] = new ImageSize(256, 256),                 // XL Sign
+                ["sign.neon.125x215"] = new ImageSize(128, 256),            // Medium
+                ["sign.neon.125x125"] = new ImageSize(128, 128),            // Small
+                ["sign.neon.xl.animated"] = new ImageSize(256, 256),        // XL Animated
+                ["sign.neon.125x215.animated"] = new ImageSize(128, 256),   // Medium Animated
 
 
                 // Other paintable assets
